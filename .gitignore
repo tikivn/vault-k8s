@@ -14,3 +14,4 @@
 /bin/*
 /.idea/*
 /.build/*
+/vendor/*
