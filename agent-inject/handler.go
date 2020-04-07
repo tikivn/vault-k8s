@@ -136,6 +136,7 @@ func (h *Handler) Mutate(req *v1beta1.AdmissionRequest) *v1beta1.AdmissionRespon
 
 	h.Log.Debug("setting default annotations..")
 	var patches []*jsonpatch.JsonPatchOperation
+	//TODO: How can  handle pod which just only enable istio without vault ?
 	err = agent.Init(&pod, h.ImageVault, h.VaultAddress, h.VaultAuthPath, req.Namespace)
 	if err != nil {
 		err := fmt.Errorf("error adding default annotations: %s", err)
@@ -242,12 +243,12 @@ func (h *Handler) Mutate(req *v1beta1.AdmissionRequest) *v1beta1.AdmissionRespon
 		// if err != nil {
 		// 	h.Log.Debug("Error patching main container")
 		// }
-		if len(patch) > 0 {
-			var err error
-			allPatches, err = json.Marshal(patch)
-			if err != nil {
-				h.Log.Debug("Error Marshal patch")
-			}
+	}
+	if len(patch) > 0 {
+		var err error
+		allPatches, err = json.Marshal(patch)
+		if err != nil {
+			h.Log.Debug("Error Marshal patch")
 		}
 	}
 	h.Log.Debug(string(allPatches))

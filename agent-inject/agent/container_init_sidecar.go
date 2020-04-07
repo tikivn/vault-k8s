@@ -55,7 +55,7 @@ func (a *Agent) ContainerInitSidecar() (corev1.Container, error) {
 		return corev1.Container{}, err
 	}
 
-	return corev1.Container{
+	container := corev1.Container{
 		Name:      "vault-agent-init",
 		Image:     a.ImageName,
 		Env:       envs,
@@ -68,5 +68,15 @@ func (a *Agent) ContainerInitSidecar() (corev1.Container, error) {
 		VolumeMounts: volumeMounts,
 		Command:      []string{"/bin/sh", "-ec"},
 		Args:         []string{arg},
-	}, nil
+	}
+
+	//Pass Inject Istio to init container
+	if a.Istio.IsEnableIstioInitContainer {
+		container.Args[0] = a.rewriteContainerCommand(arg)
+		envs = append(envs, a.createIstioInitEnv())
+		container.Env = envs
+		container.SecurityContext = a.createIstioInitSecurityContext()
+	}
+
+	return container, nil
 }

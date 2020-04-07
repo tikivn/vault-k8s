@@ -21,6 +21,12 @@ const (
 	// be set to a true or false value, as parseable by strconv.ParseBool
 	AnnotationAgentInject = "vault.hashicorp.com/agent-inject"
 
+	// AnnotationIstioInitInject is the key of annotation that control whether
+	// injection is enabled or disabled. Should be set to true or false value
+	AnnotationIstioInitInject = "sidecar.istio.io/inject"
+
+	AnnotationIstioInitStatus = "sidecar.istio.io/init-container-status"
+
 	// AnnotationAgentInjectSecret is the key annotation that configures Vault
 	// Agent to retrieve the secrets from Vault required by the app.  The name
 	// of the secret is any unique string after "vault.hashicorp.com/agent-inject-secret-",
@@ -250,7 +256,7 @@ func plutonEnvs(annotations map[string]string) []*PlutonEnv {
 func (a *Agent) inject() (bool, error) {
 	raw, ok := a.Annotations[AnnotationAgentInject]
 	if !ok {
-		return true, nil
+		return false, nil
 	}
 
 	return strconv.ParseBool(raw)
@@ -259,7 +265,7 @@ func (a *Agent) inject() (bool, error) {
 func (a *Agent) injectPluton() (bool, error) {
 	raw, ok := a.Annotations[AnnotationPlutonInject]
 	if !ok {
-		return true, nil
+		return false, nil
 	}
 
 	return strconv.ParseBool(raw)
@@ -285,6 +291,15 @@ func (a *Agent) prePopulateOnly() (bool, error) {
 
 func (a *Agent) tlsSkipVerify() (bool, error) {
 	raw, ok := a.Annotations[AnnotationVaultTLSSkipVerify]
+	if !ok {
+		return false, nil
+	}
+
+	return strconv.ParseBool(raw)
+}
+
+func (a *Agent) getIstioInitInjectFlag() (bool, error) {
+	raw, ok := a.Annotations[AnnotationIstioInitInject]
 	if !ok {
 		return false, nil
 	}

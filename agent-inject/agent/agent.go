@@ -85,6 +85,9 @@ type Agent struct {
 	// Vault is the structure holding all the Vault specific configurations.
 	Vault Vault
 
+	//IstioInjection contain config value of Istio
+	Istio IstioInjection
+
 	// Pluton is the structure holding all the Pluton specific configurations.
 	InjectPluton   bool
 	Pluton         Pluton
@@ -152,6 +155,11 @@ type Vault struct {
 	InjectMode string
 }
 
+type IstioInjection struct {
+	IsEnableIstioInitContainer bool
+	InitContainerImage         string
+}
+
 type Pluton struct {
 	InfluxdbUrl string
 }
@@ -199,10 +207,17 @@ func New(pod *corev1.Pod, patches []*jsonpatch.JsonPatchOperation) (*Agent, erro
 			TLSServerName:    pod.Annotations[AnnotationVaultTLSServerName],
 			InjectMode:       pod.Annotations[AnnotationAgentInjectMode],
 		},
+		Istio: IstioInjection{},
 	}
 
 	var err error
 	agent.Inject, err = agent.inject()
+	if err != nil {
+		return agent, err
+	}
+
+	agent.Istio.IsEnableIstioInitContainer, err = agent.getIstioInitInjectFlag()
+
 	if err != nil {
 		return agent, err
 	}
@@ -249,6 +264,27 @@ func ShouldInject(pod *corev1.Pod) (bool, error) {
 			return false, nil
 		} else {
 			return true, nil
+		}
+	}
+
+	//check annotation injectIstio and status IstioInject
+	rawIstio, ok := pod.Annotations[AnnotationIstioInitInject]
+
+	if ok {
+		shouldInjectIstioInitContainer, err := strconv.ParseBool(rawIstio)
+		fmt.Println("istio inject flat enable")
+		if err != nil {
+			return false, err
+		}
+		if shouldInjectIstioInitContainer {
+			istioInjectStatus, ok := pod.Annotations[AnnotationIstioInitStatus]
+			if ok {
+				if istioInjectStatus != "injected" {
+					return true, nil
+				}
+			} else {
+				return true, nil
+			}
 		}
 	}
 
@@ -320,11 +356,21 @@ func (a *Agent) Patch() ([]*jsonpatch.JsonPatchOperation, error) {
 	}
 
 	// Init Container
+	var container corev1.Container
+	var getContainerErr error
 	if a.PrePopulate {
-		container, err := a.ContainerInitSidecar()
-		if err != nil {
-			return patches, err
+		container, getContainerErr = a.ContainerInitSidecar()
+	} else {
+		if a.Istio.IsEnableIstioInitContainer == true {
+			container, getContainerErr = a.CreateIstioInitSidecar()
 		}
+	}
+
+	if getContainerErr != nil {
+		return patches, getContainerErr
+	}
+	//if container with noname => container struct is not set => do not append
+	if container.Name != "" {
 		a.Patches = append(a.Patches, addContainers(
 			a.Pod.Spec.InitContainers,
 			[]corev1.Container{container},
@@ -332,7 +378,7 @@ func (a *Agent) Patch() ([]*jsonpatch.JsonPatchOperation, error) {
 	}
 
 	// Sidecar Container
-	if !a.PrePopulateOnly {
+	if !a.PrePopulateOnly && a.Inject {
 		container, err := a.ContainerSidecar()
 		if err != nil {
 			return patches, err
@@ -344,9 +390,16 @@ func (a *Agent) Patch() ([]*jsonpatch.JsonPatchOperation, error) {
 	}
 
 	// Add annotations so that we know we're injected
-	a.Patches = append(a.Patches, updateAnnotations(
-		a.Pod.Annotations,
-		map[string]string{AnnotationAgentStatus: "injected"})...)
+	annotations := map[string]string{
+		AnnotationAgentStatus: "injected",
+	}
+	if a.Istio.IsEnableIstioInitContainer {
+		annotations[AnnotationIstioInitStatus] = "injected"
+		if deployName, err := getDeploymentNameFromPodName(a.Pod.Name); err == nil {
+			a.Patches = append(a.Patches, updateLabels(a.Pod.Labels, map[string]string{"app": deployName})...)
+		}
+	}
+	a.Patches = append(a.Patches, updateAnnotations(a.Pod.Annotations, annotations)...)
 
 	// // Modify main container
 	// a.Patches = append(a.Patches, modifyContainers(

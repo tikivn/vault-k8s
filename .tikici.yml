@@ -14,12 +14,18 @@ jobs:
             - run:
                 name: Tag image
                 command: docker tag hashicorp/vault-k8s:0.2.0 hub.infra.tiki.services/ci/vault-k8s:${BRANCH_NAME}-build-${BUILD_NUMBER}
+            - run:
+                name: Tag image
+                command: docker tag hashicorp/vault-k8s:0.2.0 asia.gcr.io/tikivn/vault-k8s:${BRANCH_NAME}-build-${BUILD_NUMBER}
 
     publish_docker:
         steps:
             - run:
                 name: Push image
                 command: docker push hub.infra.tiki.services/ci/vault-k8s:${BRANCH_NAME}-build-${BUILD_NUMBER}
+            - run:
+                name: Push image
+                command: docker push asia.gcr.io/tikivn/vault-k8s:${BRANCH_NAME}-build-${BUILD_NUMBER}
 
 
 workflows:
@@ -33,6 +39,7 @@ workflows:
                     branches:
                         only:
                             - master
+                            - add-istio
 
 
 
