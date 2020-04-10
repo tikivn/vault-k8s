@@ -188,7 +188,7 @@ func (h *Handler) Mutate(req *v1beta1.AdmissionRequest) *v1beta1.AdmissionRespon
 	vaultEnvs = append(vaultEnvs, vaultEnvMainConfig)
 
 	vaultEnvVaultAddr.Name = "VAULT_ADDR"
-	vaultEnvVaultAddr.Value = "https://vault.dev.tiki.services"
+	vaultEnvVaultAddr.Value = h.VaultAddress
 	vaultEnvs = append(vaultEnvs, vaultEnvVaultAddr)
 
 	vaultCommand = append(vaultCommand, "/vault/vault-env")
