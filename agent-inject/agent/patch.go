@@ -132,9 +132,8 @@ func getDeploymentNameFromPodName(name string) (string, error) {
 	matchList := deployReg.Split(name, 2)
 	if len(matchList) < 2 {
 		return "", fmt.Errorf("Wrong Pod Name")
-	} else {
-		return matchList[0], nil
 	}
+	return matchList[0], nil
 }
 
 // EscapeJSONPointer escapes a JSON string to be compliant with the
