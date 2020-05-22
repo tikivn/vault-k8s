@@ -261,8 +261,8 @@ func ShouldInject(pod *corev1.Pod) (bool, error) {
 			return false, err
 		}
 
+		fmt.Printf("Check if should inject pluton %t", injectPlutonOverride)
 		if !injectPlutonOverride {
-			fmt.Println("Check if should inject pluton")
 			for _, container := range pod.Spec.Containers {
 				fmt.Println(container.Name)
 				if container.Name == "pluton" {
