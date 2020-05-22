@@ -89,11 +89,12 @@ type Agent struct {
 	Istio IstioInjection
 
 	// Pluton is the structure holding all the Pluton specific configurations.
-	InjectPluton   bool
-	Pluton         Pluton
-	PlutonEnvs     []*PlutonEnv
-	MainEntrypoint string
-	MainConfig     string
+	InjectPluton         bool
+	InjectPlutonOverride bool
+	Pluton               Pluton
+	PlutonEnvs           []*PlutonEnv
+	MainEntrypoint       string
+	MainConfig           string
 }
 
 type Secret struct {
@@ -253,6 +254,22 @@ func New(pod *corev1.Pod, patches []*jsonpatch.JsonPatchOperation) (*Agent, erro
 // ShouldInject checks whether the pod in question should be injected
 // with Vault Agent containers.
 func ShouldInject(pod *corev1.Pod) (bool, error) {
+	rawPlutonOverride, ok := pod.Annotations[AnnotationPlutonInjectOverride]
+	if ok {
+		injectPlutonOverride, err := strconv.ParseBool(rawPlutonOverride)
+		if err != nil {
+			return false, err
+		}
+
+		if !injectPlutonOverride {
+			for _, container := range pod.Spec.Containers {
+				if container.Name == "pluton" {
+					return false, nil
+				}
+			}
+		}
+	}
+
 	rawPluton, ok := pod.Annotations[AnnotationPlutonInject]
 	if ok {
 		injectPluton, err := strconv.ParseBool(rawPluton)
