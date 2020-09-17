@@ -132,6 +132,14 @@ const (
 	AnnotationAgentInjectMode      = "vault.hashicorp.com/agent-inject-mode"
 	AnnotationMainEntrypoint       = "vault.hashicorp.com/main-entrypoint"
 	AnnotationMainConfig           = "vault.hashicorp.com/main-config"
+
+	AnnotationIstioInterceptionMode        = "sidecar.istio.io/interceptionMode"
+	AnnotationIstioIncludeOutboundIPRanges = "traffic.sidecar.istio.io/includeOutboundIPRanges"
+	AnnotationIstioExcludeOutboundIPRanges = "traffic.sidecar.istio.io/excludeOutboundIPRanges"
+	AnnotationIstioIncludeInboundPorts     = "traffic.sidecar.istio.io/includeInboundPorts"
+	AnnotationIstioExcludeInboundPorts     = "traffic.sidecar.istio.io/excludeInboundPorts"
+	AnnotationIstioExcludeOutboundPorts    = "traffic.sidecar.istio.io/excludeOutboundPorts"
+	AnnotationIstioKubevirtInterfaces      = "traffic.sidecar.istio.io/kubevirtInterfaces"
 )
 
 // Init configures the expected annotations required to create a new instance
@@ -256,6 +264,39 @@ func plutonEnvs(annotations map[string]string) []*PlutonEnv {
 	}
 
 	return plutonEnvs
+}
+
+func (a *Agent) istioEnvs(annotations map[string]string) map[string]string {
+	istioEnvironmentVar := make(map[string]string)
+
+	if annotations[AnnotationIstioExcludeInboundPorts] != "" {
+		istioEnvironmentVar["EXCLUDEINBOUNDPORTS"] = annotations[AnnotationIstioExcludeInboundPorts]
+	}
+
+	if annotations[AnnotationIstioExcludeOutboundIPRanges] != "" {
+		istioEnvironmentVar["EXCLUDEOUTBOUNDIPRANGE"] = annotations[AnnotationIstioExcludeOutboundIPRanges]
+	}
+
+	if annotations[AnnotationIstioExcludeOutboundPorts] != "" {
+		istioEnvironmentVar["EXCLUDEOUTBOUNDPORTS"] = annotations[AnnotationIstioExcludeOutboundPorts]
+	}
+
+	if annotations[AnnotationIstioIncludeInboundPorts] != "" {
+		istioEnvironmentVar["INCLUDEINBOUNDPORTS"] = annotations[AnnotationIstioIncludeInboundPorts]
+	}
+
+	if annotations[AnnotationIstioIncludeOutboundIPRanges] != "" {
+		istioEnvironmentVar["INCLUDEOUTBOUNDIPRANGES"] = annotations[AnnotationIstioIncludeOutboundIPRanges]
+	}
+
+	if annotations[AnnotationIstioInterceptionMode] != "" {
+		istioEnvironmentVar["INTERCEPTIONMODE"] = annotations[AnnotationIstioInterceptionMode]
+	}
+
+	if annotations[AnnotationIstioKubevirtInterfaces] != "" {
+		istioEnvironmentVar["KUBEVIRTINTERFACES"] = annotations[AnnotationIstioKubevirtInterfaces]
+	}
+	return istioEnvironmentVar
 }
 
 func (a *Agent) inject() (bool, error) {

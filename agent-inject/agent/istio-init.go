@@ -6,11 +6,20 @@ import (
 )
 
 //Add ISTIO_INIT_ENABLED env
-func (a *Agent) createIstioInitEnv() corev1.EnvVar {
-	return corev1.EnvVar{
+func (a *Agent) createIstioInitEnv() []corev1.EnvVar {
+	listEnvs := make([]corev1.EnvVar, 1)
+	envs := a.istioEnvs(a.Annotations)
+	for k, v := range envs {
+		listEnvs = append(listEnvs, corev1.EnvVar{
+			Name:  k,
+			Value: v,
+		})
+	}
+	listEnvs = append(listEnvs, corev1.EnvVar{
 		Name:  "ISTIO_INIT_ENABLED",
 		Value: "true",
-	}
+	})
+	return listEnvs
 }
 
 //Add network_admin and network_raw to container
@@ -47,7 +56,7 @@ func (a *Agent) CreateIstioInitSidecar() (corev1.Container, error) {
 	container := corev1.Container{
 		Name:            "istio-agent-init",
 		Image:           a.ImageName,
-		Env:             []corev1.EnvVar{a.createIstioInitEnv()},
+		Env:             a.createIstioInitEnv(),
 		Resources:       resources,
 		SecurityContext: a.createIstioInitSecurityContext(),
 		Command:         []string{"/bin/sh", "-ec"},
