@@ -8,6 +8,8 @@ import (
 //Add ISTIO_INIT_ENABLED env
 func (a *Agent) createIstioInitEnv() []corev1.EnvVar {
 	listEnvs := make([]corev1.EnvVar, 1)
+	listEnvs[0].Name = "ISTIO_INIT_ENABLED"
+	listEnvs[0].Value = "true"
 	envs := a.istioEnvs(a.Annotations)
 	for k, v := range envs {
 		listEnvs = append(listEnvs, corev1.EnvVar{
@@ -15,10 +17,7 @@ func (a *Agent) createIstioInitEnv() []corev1.EnvVar {
 			Value: v,
 		})
 	}
-	listEnvs = append(listEnvs, corev1.EnvVar{
-		Name:  "ISTIO_INIT_ENABLED",
-		Value: "true",
-	})
+
 	return listEnvs
 }
 
