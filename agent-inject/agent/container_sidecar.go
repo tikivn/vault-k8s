@@ -67,7 +67,7 @@ func (a *Agent) ContainerSidecar() (corev1.Container, error) {
 	pullPolicy = "Always"
 
 	return corev1.Container{
-		Name:            "pluton",
+		Name:            "pluton-vault",
 		Image:           a.ImageName,
 		Env:             envs,
 		Resources:       resources,
