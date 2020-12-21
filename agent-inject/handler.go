@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/hashicorp/go-hclog"
@@ -235,7 +236,7 @@ func (h *Handler) Mutate(req *v1beta1.AdmissionRequest) *v1beta1.AdmissionRespon
 		// var mainContainerPatch []*jsonpatch.JsonPatchOperation
 		var value interface{}
 		value = mainContainer
-		path := "/spec/containers/0"
+		path := "/spec/containers/" + strconv.Itoa(containerIdx)
 
 		mainContainerPatch := &jsonpatch.JsonPatchOperation{
 			Operation: "replace",
