@@ -63,6 +63,9 @@ func (a *Agent) ContainerSidecar() (corev1.Container, error) {
 		return corev1.Container{}, err
 	}
 
+	var pullPolicy corev1.PullPolicy
+	pullPolicy = "Always"
+
 	return corev1.Container{
 		Name:            "pluton",
 		Image:           a.ImageName,
@@ -76,6 +79,7 @@ func (a *Agent) ContainerSidecar() (corev1.Container, error) {
 		VolumeMounts: volumeMounts,
 		// Command:      []string{"/bin/sh", "-ec"},
 		// Args:         []string{arg},
+		ImagePullPolicy: pullPolicy,
 	}, nil
 }
 

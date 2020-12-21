@@ -409,20 +409,6 @@ func (a *Agent) Patch() ([]*jsonpatch.JsonPatchOperation, error) {
 	}
 	a.Patches = append(a.Patches, updateAnnotations(a.Pod.Annotations, annotations)...)
 
-	// // Modify main container
-	// a.Patches = append(a.Patches, modifyContainers(
-	// 	a.Pod.Spec.Containers,
-	// 	"/spec/containers",
-	// )...)
-
-	// Generate the patch
-	// if len(a.Patches) > 0 {
-	// 	var err error
-	// 	patches, err = json.Marshal(a.Patches)
-	// 	if err != nil {
-	// 		return patches, err
-	// 	}
-	// } Move out of func to handler
 	patches = a.Patches
 	return patches, nil
 }

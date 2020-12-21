@@ -52,6 +52,9 @@ func (a *Agent) CreateIstioInitSidecar() (corev1.Container, error) {
 		return corev1.Container{}, err
 	}
 
+	var pullPolicy corev1.PullPolicy
+	pullPolicy = "Always"
+
 	container := corev1.Container{
 		Name:            "istio-agent-init",
 		Image:           a.ImageName,
@@ -60,6 +63,7 @@ func (a *Agent) CreateIstioInitSidecar() (corev1.Container, error) {
 		SecurityContext: a.createIstioInitSecurityContext(),
 		Command:         []string{"/bin/sh", "-ec"},
 		Args:            []string{arg},
+		ImagePullPolicy: pullPolicy,
 	}
 
 	return container, nil
