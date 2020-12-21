@@ -55,6 +55,9 @@ func (a *Agent) ContainerInitSidecar() (corev1.Container, error) {
 		return corev1.Container{}, err
 	}
 
+	var pullPolicy corev1.PullPolicy
+	pullPolicy = "Always"
+
 	container := corev1.Container{
 		Name:      "vault-agent-init",
 		Image:     a.ImageName,
@@ -65,9 +68,10 @@ func (a *Agent) ContainerInitSidecar() (corev1.Container, error) {
 			RunAsGroup:   pointerutil.Int64Ptr(1000),
 			RunAsNonRoot: pointerutil.BoolPtr(true),
 		},
-		VolumeMounts: volumeMounts,
-		Command:      []string{"/bin/sh", "-ec"},
-		Args:         []string{arg},
+		VolumeMounts:    volumeMounts,
+		Command:         []string{"/bin/sh", "-ec"},
+		Args:            []string{arg},
+		ImagePullPolicy: pullPolicy,
 	}
 
 	//Pass Inject Istio to init container
