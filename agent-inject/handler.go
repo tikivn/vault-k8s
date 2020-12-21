@@ -201,28 +201,36 @@ func (h *Handler) Mutate(req *v1beta1.AdmissionRequest) *v1beta1.AdmissionRespon
 		h.Log.Debug("Mutating main container")
 		h.Log.Debug(vaultMainEntrypoint)
 
+		containerIdx := 0
+		for i, container := range podSpec.Containers {
+			if container.Name != "istio-proxy" {
+				containerIdx = i
+				break
+			}
+		}
+
 		mainContainer := corev1.Container{
-			Name:                     podSpec.Containers[0].Name,
-			Image:                    podSpec.Containers[0].Image,
+			Name:                     podSpec.Containers[containerIdx].Name,
+			Image:                    podSpec.Containers[containerIdx].Image,
 			Command:                  vaultCommand,
-			Args:                     podSpec.Containers[0].Args,
-			WorkingDir:               podSpec.Containers[0].WorkingDir,
-			Ports:                    podSpec.Containers[0].Ports,
-			EnvFrom:                  podSpec.Containers[0].EnvFrom,
+			Args:                     podSpec.Containers[containerIdx].Args,
+			WorkingDir:               podSpec.Containers[containerIdx].WorkingDir,
+			Ports:                    podSpec.Containers[containerIdx].Ports,
+			EnvFrom:                  podSpec.Containers[containerIdx].EnvFrom,
 			Env:                      vaultEnvs,
-			Resources:                podSpec.Containers[0].Resources,
-			VolumeMounts:             podSpec.Containers[0].VolumeMounts,
-			VolumeDevices:            podSpec.Containers[0].VolumeDevices,
-			LivenessProbe:            podSpec.Containers[0].LivenessProbe,
-			ReadinessProbe:           podSpec.Containers[0].ReadinessProbe,
-			Lifecycle:                podSpec.Containers[0].Lifecycle,
-			TerminationMessagePath:   podSpec.Containers[0].TerminationMessagePath,
-			TerminationMessagePolicy: podSpec.Containers[0].TerminationMessagePolicy,
-			ImagePullPolicy:          podSpec.Containers[0].ImagePullPolicy,
-			SecurityContext:          podSpec.Containers[0].SecurityContext,
-			Stdin:                    podSpec.Containers[0].Stdin,
-			StdinOnce:                podSpec.Containers[0].StdinOnce,
-			TTY:                      podSpec.Containers[0].TTY,
+			Resources:                podSpec.Containers[containerIdx].Resources,
+			VolumeMounts:             podSpec.Containers[containerIdx].VolumeMounts,
+			VolumeDevices:            podSpec.Containers[containerIdx].VolumeDevices,
+			LivenessProbe:            podSpec.Containers[containerIdx].LivenessProbe,
+			ReadinessProbe:           podSpec.Containers[containerIdx].ReadinessProbe,
+			Lifecycle:                podSpec.Containers[containerIdx].Lifecycle,
+			TerminationMessagePath:   podSpec.Containers[containerIdx].TerminationMessagePath,
+			TerminationMessagePolicy: podSpec.Containers[containerIdx].TerminationMessagePolicy,
+			ImagePullPolicy:          podSpec.Containers[containerIdx].ImagePullPolicy,
+			SecurityContext:          podSpec.Containers[containerIdx].SecurityContext,
+			Stdin:                    podSpec.Containers[containerIdx].Stdin,
+			StdinOnce:                podSpec.Containers[containerIdx].StdinOnce,
+			TTY:                      podSpec.Containers[containerIdx].TTY,
 		}
 		// var mainContainerPatch []*jsonpatch.JsonPatchOperation
 		var value interface{}
