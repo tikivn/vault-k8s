@@ -402,7 +402,7 @@ func (a *Agent) Patch() ([]*jsonpatch.JsonPatchOperation, error) {
 
 	// Sidecar Container
 	if !a.PrePopulateOnly && (a.Inject || a.InjectPluton) {
-		container, err := a.ContainerSidecar()
+		container, err := a.ContainerSidecar(a.Pod)
 		if err != nil {
 			return patches, err
 		}

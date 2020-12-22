@@ -8,7 +8,7 @@ import (
 
 // ContainerEnvVars adds the applicable environment vars
 // for the Vault Agent sidecar.
-func (a *Agent) ContainerEnvVars(init bool) ([]corev1.EnvVar, error) {
+func (a *Agent) ContainerEnvVars(init bool, isExisted bool) ([]corev1.EnvVar, error) {
 	var envs []corev1.EnvVar
 
 	if a.Vault.ClientTimeout != "" {
@@ -22,13 +22,6 @@ func (a *Agent) ContainerEnvVars(init bool) ([]corev1.EnvVar, error) {
 		envs = append(envs, corev1.EnvVar{
 			Name:  "VAULT_MAX_RETRIES",
 			Value: a.Vault.ClientMaxRetries,
-		})
-	}
-
-	if a.Pluton.InfluxdbUrl != "" {
-		envs = append(envs, corev1.EnvVar{
-			Name:  "TK_INFLUXDB_URL",
-			Value: a.Pluton.InfluxdbUrl,
 		})
 	}
 
@@ -57,6 +50,24 @@ func (a *Agent) ContainerEnvVars(init bool) ([]corev1.EnvVar, error) {
 			Name:  envVar.Key,
 			Value: envVar.Value,
 		})
+	}
+
+	if isExisted {
+		envs = append(envs, corev1.EnvVar{
+			Name:  "TK_TDAGENT_ENABLED",
+			Value: "false",
+		})
+		envs = append(envs, corev1.EnvVar{
+			Name:  "TK_TELEGRAF_ENABLED",
+			Value: "false",
+		})
+	} else {
+		if a.Pluton.InfluxdbUrl != "" {
+			envs = append(envs, corev1.EnvVar{
+				Name:  "TK_INFLUXDB_URL",
+				Value: a.Pluton.InfluxdbUrl,
+			})
+		}
 	}
 
 	return envs, nil

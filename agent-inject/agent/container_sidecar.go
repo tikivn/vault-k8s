@@ -20,7 +20,16 @@ const (
 
 // ContainerSidecar creates a new container to be added
 // to the pod being mutated.
-func (a *Agent) ContainerSidecar() (corev1.Container, error) {
+func (a *Agent) ContainerSidecar(pod *corev1.Pod) (corev1.Container, error) {
+
+	isExisted := false
+	for _, container := range pod.Spec.Containers {
+		if container.Name == "pluton" {
+			isExisted = true
+			break
+		}
+	}
+
 	volumeMounts := []corev1.VolumeMount{
 		{
 			Name:      secretVolumeName,
@@ -34,17 +43,6 @@ func (a *Agent) ContainerSidecar() (corev1.Container, error) {
 		},
 	}
 
-	// arg := DefaultContainerArg
-
-	// if a.ConfigMapName != "" {
-	// 	volumeMounts = append(volumeMounts, corev1.VolumeMount{
-	// 		Name:      configVolumeName,
-	// 		MountPath: configVolumePath,
-	// 		ReadOnly:  true,
-	// 	})
-	// 	arg = fmt.Sprintf("vault agent -config=%s/config.hcl", configVolumePath)
-	// }
-
 	if a.Vault.TLSSecret != "" {
 		volumeMounts = append(volumeMounts, corev1.VolumeMount{
 			Name:      tlsSecretVolumeName,
@@ -53,7 +51,7 @@ func (a *Agent) ContainerSidecar() (corev1.Container, error) {
 		})
 	}
 
-	envs, err := a.ContainerEnvVars(false)
+	envs, err := a.ContainerEnvVars(false, isExisted)
 	if err != nil {
 		return corev1.Container{}, err
 	}
