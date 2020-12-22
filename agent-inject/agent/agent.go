@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/ashwanthkumar/slack-go-webhook"
 	"github.com/mattbaird/jsonpatch"
 	corev1 "k8s.io/api/core/v1"
 )
@@ -257,7 +258,21 @@ func ShouldInject(pod *corev1.Pod) (bool, error) {
 	for _, container := range pod.Spec.Containers {
 		fmt.Println(container.Name)
 		if container.Name == "pluton" {
-			return false, nil
+			webhookUrl := "https://hooks.slack.com/services/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"
+
+			attachment1 := slack.Attachment{}
+			payload := slack.Payload{
+				Text:        "Container pluton is existed",
+				Username:    "vault-agent-injector",
+				Channel:     "#architecture-ci",
+				IconEmoji:   ":monkey_face:",
+				Attachments: []slack.Attachment{attachment1},
+			}
+			err := slack.Send(webhookUrl, "", payload)
+			if len(err) > 0 {
+				fmt.Printf("error: %s\n", err)
+			}
+			// return false, nil
 		}
 	}
 
