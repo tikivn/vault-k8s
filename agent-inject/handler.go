@@ -42,6 +42,7 @@ type Handler struct {
 	ImageVault        string
 	Clientset         *kubernetes.Clientset
 	Log               hclog.Logger
+	SlackWebhook      string
 }
 
 // Handle is the http.HandlerFunc implementation that actually handles the
@@ -120,7 +121,7 @@ func (h *Handler) Mutate(req *v1beta1.AdmissionRequest) *v1beta1.AdmissionRespon
 	}
 
 	h.Log.Debug("checking if should inject agent..")
-	inject, err := agent.ShouldInject(&pod)
+	inject, err := agent.ShouldInject(&pod, h.SlackWebhook)
 	if err != nil && !strings.Contains(err.Error(), "no inject annotation found") {
 		err := fmt.Errorf("error checking if should inject agent: %s", err)
 		return admissionError(err)

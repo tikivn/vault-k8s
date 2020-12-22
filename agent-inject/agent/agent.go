@@ -254,17 +254,17 @@ func New(pod *corev1.Pod, patches []*jsonpatch.JsonPatchOperation) (*Agent, erro
 
 // ShouldInject checks whether the pod in question should be injected
 // with Vault Agent containers.
-func ShouldInject(pod *corev1.Pod) (bool, error) {
+func ShouldInject(pod *corev1.Pod, slackWebhook string) (bool, error) {
 	for _, container := range pod.Spec.Containers {
 		fmt.Println(container.Name)
 		if container.Name == "pluton" {
-			webhookUrl := "https://hooks.slack.com/services/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"
+			webhookUrl := slackWebhook
 
 			attachment1 := slack.Attachment{}
 			payload := slack.Payload{
 				Text:        "Container pluton is existed",
 				Username:    "vault-agent-injector",
-				Channel:     "#architecture-ci",
+				Channel:     "#architecture-tmp",
 				IconEmoji:   ":monkey_face:",
 				Attachments: []slack.Attachment{attachment1},
 			}

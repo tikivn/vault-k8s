@@ -27,15 +27,16 @@ import (
 type Command struct {
 	UI cli.Ui
 
-	flagListen       	string // Address of Vault Server
-	flagLogLevel     	string // Log verbosity
-	flagCertFile     	string // TLS Certificate to serve
-	flagKeyFile      	string // TLS private key to serve
-	flagAutoName     	string // MutatingWebhookConfiguration for updating
-	flagAutoHosts    	string // SANs for the auto-generated TLS cert.
-	flagVaultService 	string // Name of the Vault service
-	flagVaultImage   	string // Name of the Vault Image to use
-	flagVaultAuthPath	string // Mount Path of the Vault Kubernetes Auth Method
+	flagListen        string // Address of Vault Server
+	flagLogLevel      string // Log verbosity
+	flagCertFile      string // TLS Certificate to serve
+	flagKeyFile       string // TLS private key to serve
+	flagAutoName      string // MutatingWebhookConfiguration for updating
+	flagAutoHosts     string // SANs for the auto-generated TLS cert.
+	flagVaultService  string // Name of the Vault service
+	flagVaultImage    string // Name of the Vault Image to use
+	flagVaultAuthPath string // Mount Path of the Vault Kubernetes Auth Method
+	flagSlackWebhook  string // Slack webhook URL
 
 	flagSet *flag.FlagSet
 
@@ -113,6 +114,7 @@ func (c *Command) Run(args []string) int {
 		Clientset:         clientset,
 		RequireAnnotation: true,
 		Log:               logger,
+		SlackWebhook:      c.flagSlackWebhook,
 	}
 
 	mux := http.NewServeMux()
