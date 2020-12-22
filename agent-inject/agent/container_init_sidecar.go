@@ -45,7 +45,7 @@ func (a *Agent) ContainerInitSidecar() (corev1.Container, error) {
 		})
 	}
 
-	envs, err := a.ContainerEnvVars(true)
+	envs, err := a.ContainerEnvVars(true, false)
 	if err != nil {
 		return corev1.Container{}, err
 	}
