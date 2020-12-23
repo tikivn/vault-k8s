@@ -61,13 +61,6 @@ func (a *Agent) ContainerEnvVars(init bool, isExisted bool) ([]corev1.EnvVar, er
 			Name:  "TK_TELEGRAF_ENABLED",
 			Value: "false",
 		})
-	} else {
-		if a.Pluton.InfluxdbUrl != "" {
-			envs = append(envs, corev1.EnvVar{
-				Name:  "TK_INFLUXDB_URL",
-				Value: a.Pluton.InfluxdbUrl,
-			})
-		}
 	}
 
 	return envs, nil
